@@ -119,15 +119,17 @@ help: .help-post
 .help-post: .help-impl
 # Add your post 'help' code here...
 
-# install
-install: .install-header
-
-.install-header:
-	mkdir -p /usr/local/include/libcpuid
-	cp CpuId.hpp /usr/local/include/libcpuid/CpuId.hpp
-
 # include project implementation makefile
 include nbproject/Makefile-impl.mk
 
 # include project make variables
 include nbproject/Makefile-variables.mk
+
+# install
+install: .install-header
+
+.install-header:
+	${MKDIR} -p /usr/local/include/libcpuid
+	${CP} CpuId.hpp /usr/local/include/libcpuid/CpuId.hpp
+	${MKDIR} -p /usr/local/lib/libcpuid
+	${CP} ${CND_DISTDIR}/${CONF}/${CND_PLATFORM_Release}/libcpuid.so /usr/local/lib/libcpuid/libcpuid.so
