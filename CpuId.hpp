@@ -12,7 +12,14 @@
 
 using namespace std;
 
-extern "C" uint32_t* cpuid(uint32_t in);
+struct CpuRegisters {
+	uint32_t eax;
+	uint32_t ebx;
+	uint32_t ecx;
+	uint32_t edx;
+};
+
+extern "C" CpuRegisters cpuid(uint32_t in);
 
 class CpuId {
 	public:

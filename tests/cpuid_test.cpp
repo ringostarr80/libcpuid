@@ -30,21 +30,21 @@ void cpuid_test::tearDown() {
 
 void cpuid_test::cpuidTest() {
 	bool invalidCharFound = false;
-	uint32_t *regs = cpuid(0);
+	CpuRegisters regs = cpuid(0);
 
 	char vendorID[13];
-	vendorID[0] = (regs[1]) & 0xFF;
-	vendorID[1] = (regs[1] >> 8) & 0xFF;
-	vendorID[2] = (regs[1] >> 16) & 0xFF;
-	vendorID[3] = (regs[1] >> 24);
-	vendorID[4] = (regs[3]) & 0xFF;
-	vendorID[5] = (regs[3] >> 8) & 0xFF;
-	vendorID[6] = (regs[3] >> 16) & 0xFF;
-	vendorID[7] = (regs[3] >> 24) & 0xFF;
-	vendorID[8] = (regs[2]) & 0xFF;
-	vendorID[9] = (regs[2] >> 8) & 0xFF;
-	vendorID[10] = (regs[2] >> 16) & 0xFF;
-	vendorID[11] = (regs[2] >> 24) & 0xFF;
+	vendorID[0] = (regs.ebx) & 0xFF;
+	vendorID[1] = (regs.ebx >> 8) & 0xFF;
+	vendorID[2] = (regs.ebx >> 16) & 0xFF;
+	vendorID[3] = (regs.ebx >> 24);
+	vendorID[4] = (regs.edx) & 0xFF;
+	vendorID[5] = (regs.edx >> 8) & 0xFF;
+	vendorID[6] = (regs.edx >> 16) & 0xFF;
+	vendorID[7] = (regs.edx >> 24) & 0xFF;
+	vendorID[8] = (regs.ecx) & 0xFF;
+	vendorID[9] = (regs.ecx >> 8) & 0xFF;
+	vendorID[10] = (regs.ecx >> 16) & 0xFF;
+	vendorID[11] = (regs.ecx >> 24) & 0xFF;
 	vendorID[12] = '\0';
 
 	for(uint8_t i = 0; i < sizeof(vendorID) - 1; i++) {

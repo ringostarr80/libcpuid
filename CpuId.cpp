@@ -14,10 +14,8 @@
  * @param in input for cpu register eax
  * @return output of the 4 cpu registers eax, ebx, ecx and edx
  */
-extern "C" uint32_t* cpuid(uint32_t in) {
-	uint32_t *ptr;
-	uint32_t regs[4] = {0, 0, 0, 0};
-	ptr = regs;
+extern "C" CpuRegisters cpuid(uint32_t in) {
+	struct CpuRegisters regs = {0, 0, 0, 0};
 
 	__asm("mov %4, %%eax;"
 		"cpuid;"
@@ -25,11 +23,11 @@ extern "C" uint32_t* cpuid(uint32_t in) {
 		"mov %%ebx, %1;"
 		"mov %%ecx, %2;"
 		"mov %%edx, %3;"
-		:"=a"(regs[0]), "=b"(regs[1]), "=c"(regs[2]), "=d"(regs[3])
+		:"=a"(regs.eax), "=b"(regs.ebx), "=c"(regs.ecx), "=d"(regs.edx)
 		:"r"(in)
 	);
 
-	return ptr;
+	return regs;
 }
 
 CpuId::CpuId() {
@@ -48,29 +46,21 @@ CpuId::~CpuId() {
 }
 
 void CpuId::detectVendorId() {
-	uint32_t ebx, ecx, edx;
+	CpuRegisters regs = cpuid(0);
 	char vendorID[13];
 
-	__asm("mov %3, %%eax;"			// 0 into eax
-		"cpuid;"
-		"mov %%ebx, %0;"
-		"mov %%ecx, %1;"
-		"mov %%edx, %2;"
-		:"=b"(ebx), "=c"(ecx), "=d"(edx)
-		:"r"(0)
-	);
-	vendorID[0] = (ebx) & 0xFF;
-	vendorID[1] = (ebx >> 8) & 0xFF;
-	vendorID[2] = (ebx >> 16) & 0xFF;
-	vendorID[3] = (ebx >> 24);
-	vendorID[4] = (edx) & 0xFF;
-	vendorID[5] = (edx >> 8) & 0xFF;
-	vendorID[6] = (edx >> 16) & 0xFF;
-	vendorID[7] = (edx >> 24) & 0xFF;
-	vendorID[8] = (ecx) & 0xFF;
-	vendorID[9] = (ecx >> 8) & 0xFF;
-	vendorID[10] = (ecx >> 16) & 0xFF;
-	vendorID[11] = (ecx >> 24) & 0xFF;
+	vendorID[0] = (regs.ebx) & 0xFF;
+	vendorID[1] = (regs.ebx >> 8) & 0xFF;
+	vendorID[2] = (regs.ebx >> 16) & 0xFF;
+	vendorID[3] = (regs.ebx >> 24);
+	vendorID[4] = (regs.edx) & 0xFF;
+	vendorID[5] = (regs.edx >> 8) & 0xFF;
+	vendorID[6] = (regs.edx >> 16) & 0xFF;
+	vendorID[7] = (regs.edx >> 24) & 0xFF;
+	vendorID[8] = (regs.ecx) & 0xFF;
+	vendorID[9] = (regs.ecx >> 8) & 0xFF;
+	vendorID[10] = (regs.ecx >> 16) & 0xFF;
+	vendorID[11] = (regs.ecx >> 24) & 0xFF;
 	vendorID[12] = '\0';
 
 	this->vendorId = vendorID;
@@ -81,24 +71,16 @@ string CpuId::getVendorId() {
 }
 
 void CpuId::detectProcessorInfoAndFeatureBits() {
-	uint32_t eax, ecx, edx;
+	CpuRegisters regs = cpuid(1);
+
 	uint8_t stepping, model, family, processor_type, extended_model, extended_family;
 
-	__asm("mov %3, %%eax;"			// 1 into eax
-		"cpuid;"
-		"mov %%eax, %0;"
-		"mov %%ecx, %1;"
-		"mov %%edx, %2;"
-		:"=a"(eax), "=c"(ecx), "=d"(edx)
-		:"r"(1)
-	);
-
-	stepping = (eax) & 0x0F;
-	model = (eax >> 4) & 0x0F;
-	family = (eax >> 8) & 0x0F;
-	processor_type = (eax >> 12) & 0x03;
-	extended_model = (eax >> 16) & 0x0F;
-	extended_family = (eax >> 20) & 0xFF;
+	stepping = (regs.eax) & 0x0F;
+	model = (regs.eax >> 4) & 0x0F;
+	family = (regs.eax >> 8) & 0x0F;
+	processor_type = (regs.eax >> 12) & 0x03;
+	extended_model = (regs.eax >> 16) & 0x0F;
+	extended_family = (regs.eax >> 20) & 0xFF;
 	this->processorInfo = {
 		stepping,
 		model,
@@ -109,172 +91,149 @@ void CpuId::detectProcessorInfoAndFeatureBits() {
 	};
 
 	this->featureBits = {
-		((ecx & 0x01) > 0),
-		((ecx & 0x02) > 0),
-		((ecx & 0x04) > 0),
-		((ecx & 0x08) > 0),
-		((ecx & 0x10) > 0),
-		((ecx & 0x20) > 0),
-		((ecx & 0x40) > 0),
-		((ecx & 0x80) > 0),
-		((ecx & 0x100) > 0),
-		((ecx & 0x200) > 0),
-		((ecx & 0x400) > 0),
+		((regs.ecx & 0x01) > 0),
+		((regs.ecx & 0x02) > 0),
+		((regs.ecx & 0x04) > 0),
+		((regs.ecx & 0x08) > 0),
+		((regs.ecx & 0x10) > 0),
+		((regs.ecx & 0x20) > 0),
+		((regs.ecx & 0x40) > 0),
+		((regs.ecx & 0x80) > 0),
+		((regs.ecx & 0x100) > 0),
+		((regs.ecx & 0x200) > 0),
+		((regs.ecx & 0x400) > 0),
 
-		((ecx & 0x1000) > 0),
-		((ecx & 0x2000) > 0),
-		((ecx & 0x4000) > 0),
-		((ecx & 0x8000) > 0),
+		((regs.ecx & 0x1000) > 0),
+		((regs.ecx & 0x2000) > 0),
+		((regs.ecx & 0x4000) > 0),
+		((regs.ecx & 0x8000) > 0),
 
-		((ecx & 0x20000) > 0),
-		((ecx & 0x40000) > 0),
-		((ecx & 0x80000) > 0),
-		((ecx & 0x100000) > 0),
-		((ecx & 0x200000) > 0),
-		((ecx & 0x400000) > 0),
-		((ecx & 0x800000) > 0),
-		((ecx & 0x1000000) > 0),
-		((ecx & 0x2000000) > 0),
-		((ecx & 0x4000000) > 0),
-		((ecx & 0x8000000) > 0),
-		((ecx & 0x10000000) > 0),
-		((ecx & 0x20000000) > 0),
-		((ecx & 0x40000000) > 0),
-		((ecx & 0x80000000) > 0),
+		((regs.ecx & 0x20000) > 0),
+		((regs.ecx & 0x40000) > 0),
+		((regs.ecx & 0x80000) > 0),
+		((regs.ecx & 0x100000) > 0),
+		((regs.ecx & 0x200000) > 0),
+		((regs.ecx & 0x400000) > 0),
+		((regs.ecx & 0x800000) > 0),
+		((regs.ecx & 0x1000000) > 0),
+		((regs.ecx & 0x2000000) > 0),
+		((regs.ecx & 0x4000000) > 0),
+		((regs.ecx & 0x8000000) > 0),
+		((regs.ecx & 0x10000000) > 0),
+		((regs.ecx & 0x20000000) > 0),
+		((regs.ecx & 0x40000000) > 0),
+		((regs.ecx & 0x80000000) > 0),
 
-		((edx & 0x01) > 0),
-		((edx & 0x02) > 0),
-		((edx & 0x04) > 0),
-		((edx & 0x08) > 0),
-		((edx & 0x10) > 0),
-		((edx & 0x20) > 0),
-		((edx & 0x40) > 0),
-		((edx & 0x80) > 0),
-		((edx & 0x100) > 0),
-		((edx & 0x200) > 0),
+		((regs.edx & 0x01) > 0),
+		((regs.edx & 0x02) > 0),
+		((regs.edx & 0x04) > 0),
+		((regs.edx & 0x08) > 0),
+		((regs.edx & 0x10) > 0),
+		((regs.edx & 0x20) > 0),
+		((regs.edx & 0x40) > 0),
+		((regs.edx & 0x80) > 0),
+		((regs.edx & 0x100) > 0),
+		((regs.edx & 0x200) > 0),
 
-		((edx & 0x800) > 0),
-		((edx & 0x1000) > 0),
-		((edx & 0x2000) > 0),
-		((edx & 0x4000) > 0),
-		((edx & 0x8000) > 0),
-		((edx & 0x10000) > 0),
-		((edx & 0x20000) > 0),
-		((edx & 0x40000) > 0),
-		((edx & 0x80000) > 0),
+		((regs.edx & 0x800) > 0),
+		((regs.edx & 0x1000) > 0),
+		((regs.edx & 0x2000) > 0),
+		((regs.edx & 0x4000) > 0),
+		((regs.edx & 0x8000) > 0),
+		((regs.edx & 0x10000) > 0),
+		((regs.edx & 0x20000) > 0),
+		((regs.edx & 0x40000) > 0),
+		((regs.edx & 0x80000) > 0),
 
-		((edx & 0x200000) > 0),
-		((edx & 0x400000) > 0),
-		((edx & 0x800000) > 0),
-		((edx & 0x1000000) > 0),
-		((edx & 0x2000000) > 0),
-		((edx & 0x4000000) > 0),
-		((edx & 0x8000000) > 0),
-		((edx & 0x10000000) > 0),
-		((edx & 0x20000000) > 0),
-		((edx & 0x40000000) > 0),
-		((edx & 0x80000000) > 0)
+		((regs.edx & 0x200000) > 0),
+		((regs.edx & 0x400000) > 0),
+		((regs.edx & 0x800000) > 0),
+		((regs.edx & 0x1000000) > 0),
+		((regs.edx & 0x2000000) > 0),
+		((regs.edx & 0x4000000) > 0),
+		((regs.edx & 0x8000000) > 0),
+		((regs.edx & 0x10000000) > 0),
+		((regs.edx & 0x20000000) > 0),
+		((regs.edx & 0x40000000) > 0),
+		((regs.edx & 0x80000000) > 0)
 	};
 }
 
 void CpuId::detectExtendedProcessorInfoAndFeatureBits() {
-	uint32_t ecx, edx;
+	CpuRegisters regs = cpuid(0x80000001);
 
-	__asm("mov %2, %%eax;"
-		"cpuid;"
-		"mov %%ecx, %0;"
-		"mov %%edx, %1;"
-		:"=c"(ecx), "=d"(edx)
-		:"r"(0x80000001)
-	);
+	this->featureBits.LAHF_SAHF_InLongMode = ((regs.ecx & 0x01) > 0);
+	this->featureBits.HyperThreadingNotValid = ((regs.ecx & 0x02) > 0);
+	this->featureBits.SecureVirtualMachine = ((regs.ecx & 0x04) > 0);
+	this->featureBits.ExtendedAPICSpace = ((regs.ecx & 0x08) > 0);
+	this->featureBits.CR8In32BitMode = ((regs.ecx & 0x10) > 0);
+	this->featureBits.AdvancedBitManipulation = ((regs.ecx & 0x20) > 0);
+	this->featureBits.SSE4a = ((regs.ecx & 0x40) > 0);
+	this->featureBits.MisalignedSSEMode = ((regs.ecx & 0x80) > 0);
+	this->featureBits.PREFETCHAndPREFETCHWInstructions = ((regs.ecx & 0x100) > 0);
+	this->featureBits.OSVisibleWorkaround = ((regs.ecx & 0x200) > 0);
+	this->featureBits.InstructionBasedSampling = ((regs.ecx & 0x400) > 0);
+	this->featureBits.XOPInstructionSet = ((regs.ecx & 0x800) > 0);
+	this->featureBits.SKINIT_STGI_Instructions = ((regs.ecx & 0x1000) > 0);
+	this->featureBits.WatchdogTimer = ((regs.ecx & 0x2000) > 0);
 
-	this->featureBits.LAHF_SAHF_InLongMode = ((ecx & 0x01) > 0);
-	this->featureBits.HyperThreadingNotValid = ((ecx & 0x02) > 0);
-	this->featureBits.SecureVirtualMachine = ((ecx & 0x04) > 0);
-	this->featureBits.ExtendedAPICSpace = ((ecx & 0x08) > 0);
-	this->featureBits.CR8In32BitMode = ((ecx & 0x10) > 0);
-	this->featureBits.AdvancedBitManipulation = ((ecx & 0x20) > 0);
-	this->featureBits.SSE4a = ((ecx & 0x40) > 0);
-	this->featureBits.MisalignedSSEMode = ((ecx & 0x80) > 0);
-	this->featureBits.PREFETCHAndPREFETCHWInstructions = ((ecx & 0x100) > 0);
-	this->featureBits.OSVisibleWorkaround = ((ecx & 0x200) > 0);
-	this->featureBits.InstructionBasedSampling = ((ecx & 0x400) > 0);
-	this->featureBits.XOPInstructionSet = ((ecx & 0x800) > 0);
-	this->featureBits.SKINIT_STGI_Instructions = ((ecx & 0x1000) > 0);
-	this->featureBits.WatchdogTimer = ((ecx & 0x2000) > 0);
+	this->featureBits.LightweightProfiling = ((regs.ecx & 0x8000) > 0);
+	this->featureBits.FourOperandsFusedMultiplyAdd = ((regs.ecx & 0x10000) > 0);
+	this->featureBits.TranslationCacheExtension = ((regs.ecx & 0x20000) > 0);
 
-	this->featureBits.LightweightProfiling = ((ecx & 0x8000) > 0);
-	this->featureBits.FourOperandsFusedMultiplyAdd = ((ecx & 0x10000) > 0);
-	this->featureBits.TranslationCacheExtension = ((ecx & 0x20000) > 0);
+	this->featureBits.NodeID_MSR = ((regs.ecx & 0x80000) > 0);
 
-	this->featureBits.NodeID_MSR = ((ecx & 0x80000) > 0);
+	this->featureBits.TrailingBitManipulation = ((regs.ecx & 0x200000) > 0);
+	this->featureBits.TopologyExtensions = ((regs.ecx & 0x400000) > 0);
+	this->featureBits.CorePerformanceCounterExtensions = ((regs.ecx & 0x800000) > 0);
+	this->featureBits.NBPerformanceCounterExtensions = ((regs.ecx & 0x1000000) > 0);
 
-	this->featureBits.TrailingBitManipulation = ((ecx & 0x200000) > 0);
-	this->featureBits.TopologyExtensions = ((ecx & 0x400000) > 0);
-	this->featureBits.CorePerformanceCounterExtensions = ((ecx & 0x800000) > 0);
-	this->featureBits.NBPerformanceCounterExtensions = ((ecx & 0x1000000) > 0);
+	this->featureBits.SYSCALLAndSYSRETInstructions = ((regs.edx & 0x800) > 0);
 
-	this->featureBits.SYSCALLAndSYSRETInstructions = ((edx & 0x800) > 0);
+	this->featureBits.MultiprocessorCapable = ((regs.edx & 0x80000) > 0);
+	this->featureBits.NXBit = ((regs.edx & 0x100000) > 0);
 
-	this->featureBits.MultiprocessorCapable = ((edx & 0x80000) > 0);
-	this->featureBits.NXBit = ((edx & 0x100000) > 0);
+	this->featureBits.ExtendedMMX = ((regs.edx & 0x400000) > 0);
 
-	this->featureBits.ExtendedMMX = ((edx & 0x400000) > 0);
+	this->featureBits.FXSAVE_FXRSTOR_Instructions = ((regs.edx & 0x1000000) > 0);
+	this->featureBits.FXSAVE_FXRSTOR_Optimizations = ((regs.edx & 0x2000000) > 0);
+	this->featureBits.GibibytePages = ((regs.edx & 0x4000000) > 0);
+	this->featureBits.RDTSCPInstruction = ((regs.edx & 0x8000000) > 0);
 
-	this->featureBits.FXSAVE_FXRSTOR_Instructions = ((edx & 0x1000000) > 0);
-	this->featureBits.FXSAVE_FXRSTOR_Optimizations = ((edx & 0x2000000) > 0);
-	this->featureBits.GibibytePages = ((edx & 0x4000000) > 0);
-	this->featureBits.RDTSCPInstruction = ((edx & 0x8000000) > 0);
-
-	this->featureBits.LongMode = ((edx & 0x20000000) > 0);
-	this->featureBits.Extended3DNow = ((edx & 0x40000000) > 0);
-	this->featureBits.AMD3DNow = ((edx & 0x80000000) > 0);
+	this->featureBits.LongMode = ((regs.edx & 0x20000000) > 0);
+	this->featureBits.Extended3DNow = ((regs.edx & 0x40000000) > 0);
+	this->featureBits.AMD3DNow = ((regs.edx & 0x80000000) > 0);
 }
 
 void CpuId::detectProcessorBrandString() {
-	uint32_t eax, ebx, ecx, edx;
 	char processorBrandString[49];
+	CpuRegisters regs = cpuid(0x80000000);
 
-	__asm("mov %1, %%eax;"
-		"cpuid;"
-		"mov %%eax, %0;"
-		:"=a"(eax)
-		:"r"(0x80000000)
-	);
-
-	if (eax < 0x80000004) { // feature is not supported
+	if (regs.eax < 0x80000004) { // feature is not supported
 		return;
 	}
 
 	for(int i = 0; i < 3; i++) {
 		int charIndexOffset = i * 16;
 
-		__asm("mov %4, %%eax;"
-			"cpuid;"
-			"mov %%eax, %0;"
-			"mov %%ebx, %1;"
-			"mov %%ecx, %2;"
-			"mov %%edx, %3;"
-			:"=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
-			:"r"(0x80000002 + i)
-		);
+		regs = cpuid(0x80000002 + i);
 
-		processorBrandString[charIndexOffset + 0] = (eax) & 0xFF;
-		processorBrandString[charIndexOffset + 1] = (eax >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 2] = (eax >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 3] = (eax >> 24);
-		processorBrandString[charIndexOffset + 4] = (ebx) & 0xFF;
-		processorBrandString[charIndexOffset + 5] = (ebx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 6] = (ebx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 7] = (ebx >> 24);
-		processorBrandString[charIndexOffset + 8] = (ecx) & 0xFF;
-		processorBrandString[charIndexOffset + 9] = (ecx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 10] = (ecx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 11] = (ecx >> 24) & 0xFF;
-		processorBrandString[charIndexOffset + 12] = (edx) & 0xFF;
-		processorBrandString[charIndexOffset + 13] = (edx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 14] = (edx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 15] = (edx >> 24) & 0xFF;
+		processorBrandString[charIndexOffset + 0] = (regs.eax) & 0xFF;
+		processorBrandString[charIndexOffset + 1] = (regs.eax >> 8) & 0xFF;
+		processorBrandString[charIndexOffset + 2] = (regs.eax >> 16) & 0xFF;
+		processorBrandString[charIndexOffset + 3] = (regs.eax >> 24);
+		processorBrandString[charIndexOffset + 4] = (regs.ebx) & 0xFF;
+		processorBrandString[charIndexOffset + 5] = (regs.ebx >> 8) & 0xFF;
+		processorBrandString[charIndexOffset + 6] = (regs.ebx >> 16) & 0xFF;
+		processorBrandString[charIndexOffset + 7] = (regs.ebx >> 24);
+		processorBrandString[charIndexOffset + 8] = (regs.ecx) & 0xFF;
+		processorBrandString[charIndexOffset + 9] = (regs.ecx >> 8) & 0xFF;
+		processorBrandString[charIndexOffset + 10] = (regs.ecx >> 16) & 0xFF;
+		processorBrandString[charIndexOffset + 11] = (regs.ecx >> 24) & 0xFF;
+		processorBrandString[charIndexOffset + 12] = (regs.edx) & 0xFF;
+		processorBrandString[charIndexOffset + 13] = (regs.edx >> 8) & 0xFF;
+		processorBrandString[charIndexOffset + 14] = (regs.edx >> 16) & 0xFF;
+		processorBrandString[charIndexOffset + 15] = (regs.edx >> 24) & 0xFF;
 	}
 	processorBrandString[48] = '\0';
 
