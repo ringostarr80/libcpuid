@@ -12,6 +12,8 @@
 
 using namespace std;
 
+extern "C" uint32_t* cpuid(uint32_t in);
+
 class CpuId {
 	public:
 		enum FeatureBit {

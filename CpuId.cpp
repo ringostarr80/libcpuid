@@ -6,26 +6,37 @@
  */
 
 #include <cstdint>
+#include <iostream>
 
 #include "CpuId.hpp"
+
+/**
+ * @param in input for cpu register eax
+ * @return output of the 4 cpu registers eax, ebx, ecx and edx
+ */
+extern "C" uint32_t* cpuid(uint32_t in) {
+	uint32_t *ptr;
+	uint32_t regs[4] = {0, 0, 0, 0};
+	ptr = regs;
+
+	__asm("mov %4, %%eax;"
+		"cpuid;"
+		"mov %%eax, %0;"
+		"mov %%ebx, %1;"
+		"mov %%ecx, %2;"
+		"mov %%edx, %3;"
+		:"=a"(regs[0]), "=b"(regs[1]), "=c"(regs[2]), "=d"(regs[3])
+		:"r"(in)
+	);
+
+	return ptr;
+}
 
 CpuId::CpuId() {
 	this->detectVendorId();
 	this->detectProcessorInfoAndFeatureBits();
 	this->detectExtendedProcessorInfoAndFeatureBits();
 	this->detectProcessorBrandString();
-
-	int a, b;
-
-	for (a = 0; a < 5; a++) {
-		__asm("mov %1, %%eax;"			// a into eax
-			"cpuid;"
-			"mov %%eax, %0;"			// eax into b
-			:"=r"(b)					// output
-			:"r"(a)						// input
-			:"%eax","%ebx","%ecx","%edx"// clobbered register
-		);
-	}
 }
 
 CpuId::CpuId(const CpuId& orig) {

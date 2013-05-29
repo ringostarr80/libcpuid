@@ -37,9 +37,15 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/CpuId.o
 
+# Test Directory
+TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
+
+# Test Files
+TESTFILES= \
+	${TESTDIR}/TestFiles/f1
 
 # C Compiler Flags
-CFLAGS=
+CFLAGS=-m64
 
 # CC Compiler Flags
 CCFLAGS=-m64
@@ -52,7 +58,7 @@ FFLAGS=
 ASFLAGS=--64
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-lcunit
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -69,6 +75,47 @@ ${OBJECTDIR}/CpuId.o: CpuId.cpp
 
 # Subprojects
 .build-subprojects:
+
+# Build Test Targets
+.build-tests-conf: .build-conf ${TESTFILES}
+${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/cpuid_test.o ${TESTDIR}/tests/cpuid_testrunner.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} `cppunit-config --libs` `cppunit-config --libs` `cppunit-config --libs`   
+
+
+${TESTDIR}/tests/cpuid_test.o: tests/cpuid_test.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} $@.d
+	$(COMPILE.cc) -g -Wall -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/cpuid_test.o tests/cpuid_test.cpp
+
+
+${TESTDIR}/tests/cpuid_testrunner.o: tests/cpuid_testrunner.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} $@.d
+	$(COMPILE.cc) -g -Wall -std=c++11 `cppunit-config --cflags` -MMD -MP -MF $@.d -o ${TESTDIR}/tests/cpuid_testrunner.o tests/cpuid_testrunner.cpp
+
+
+${OBJECTDIR}/CpuId_nomain.o: ${OBJECTDIR}/CpuId.o CpuId.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/CpuId.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} $@.d;\
+	    $(COMPILE.cc) -g -Wall -std=c++11 -fPIC  -Dmain=__nomain -MMD -MP -MF $@.d -o ${OBJECTDIR}/CpuId_nomain.o CpuId.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/CpuId.o ${OBJECTDIR}/CpuId_nomain.o;\
+	fi
+
+# Run Test Targets
+.test-conf:
+	@if [ "${TEST}" = "" ]; \
+	then  \
+	    ${TESTDIR}/TestFiles/f1 || true; \
+	else  \
+	    ./${TEST} || true; \
+	fi
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
