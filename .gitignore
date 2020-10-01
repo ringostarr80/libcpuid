@@ -1,2 +1,6 @@
 /build/
 /dist/
+*.o
+*.o.d
+*.so
+libcpuid_test
