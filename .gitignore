@@ -3,4 +3,5 @@
 *.o
 *.o.d
 *.so
+.dep.inc
 libcpuid_test
