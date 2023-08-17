@@ -67,14 +67,12 @@ string CpuId::getVendorId() {
 void CpuId::detectProcessorInfoAndFeatureBits() {
 	CpuRegisters regs = cpuid(1);
 
-	uint8_t stepping, model, family, processor_type, extended_model, extended_family;
-
-	stepping = (regs.eax) & 0x0F;
-	model = (regs.eax >> 4) & 0x0F;
-	family = (regs.eax >> 8) & 0x0F;
-	processor_type = (regs.eax >> 12) & 0x03;
-	extended_model = (regs.eax >> 16) & 0x0F;
-	extended_family = (regs.eax >> 20) & 0xFF;
+	uint8_t stepping = (regs.eax) & 0x0F;
+	uint8_t model = (regs.eax >> 4) & 0x0F;
+	uint8_t family = (regs.eax >> 8) & 0x0F;
+	uint8_t processor_type = (regs.eax >> 12) & 0x03;
+	uint8_t extended_model = (regs.eax >> 16) & 0x0F;
+	uint8_t extended_family = (regs.eax >> 20) & 0xFF;
 	this->processorInfo = {
 		stepping,
 		model,
