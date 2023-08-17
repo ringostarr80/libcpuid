@@ -18,10 +18,6 @@ class cpuid_test : public CPPUNIT_NS::TestFixture {
 	CPPUNIT_TEST_SUITE_END();
 
 public:
-	cpuid_test();
-	virtual ~cpuid_test();
-	void setUp();
-	void tearDown();
 
 private:
 	void cpuidTest();

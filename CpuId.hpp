@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 struct CpuRegisters {
 	uint32_t eax;
 	uint32_t ebx;
@@ -242,17 +240,15 @@ class CpuId {
 		};
 
 		CpuId();
-		CpuId(const CpuId& orig);
-		virtual ~CpuId();
 
-		string getVendorId();
-		string getProcessorBrandString();
+		std::string getVendorId();
+		std::string getProcessorBrandString();
 		ProcessorInfo getProcessorInfo();
 		FeatureBits getFeatureBits();
 		bool getFeatureBit(FeatureBit featureBit);
 	private:
-		string vendorId = "";
-		string processorBrandString = "";
+		std::string vendorId = "";
+		std::string processorBrandString = "";
 		ProcessorInfo processorInfo;
 		FeatureBits featureBits;
 

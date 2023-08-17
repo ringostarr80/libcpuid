@@ -12,22 +12,6 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(cpuid_test);
 
-cpuid_test::cpuid_test() {
-
-}
-
-cpuid_test::~cpuid_test() {
-
-}
-
-void cpuid_test::setUp() {
-
-}
-
-void cpuid_test::tearDown() {
-
-}
-
 void cpuid_test::cpuidTest() {
 	bool invalidCharFound = false;
 	CpuRegisters regs = cpuid(0);

@@ -10,6 +10,8 @@
 
 #include "CpuId.hpp"
 
+using namespace std;
+
 /**
  * @param in input for cpu register eax
  * @return output of the 4 cpu registers eax, ebx, ecx and edx
@@ -35,14 +37,6 @@ CpuId::CpuId() {
 	this->detectProcessorInfoAndFeatureBits();
 	this->detectExtendedProcessorInfoAndFeatureBits();
 	this->detectProcessorBrandString();
-}
-
-CpuId::CpuId(const CpuId& orig) {
-
-}
-
-CpuId::~CpuId() {
-
 }
 
 void CpuId::detectVendorId() {
