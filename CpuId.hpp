@@ -21,7 +21,7 @@ extern "C" CpuRegisters cpuid(uint32_t in);
 
 class CpuId {
 	public:
-		enum class FeatureBit {
+		enum FeatureBit {
 			// ecx Register
 			PrescottNewInstructions,
 			PCLMULQDQ,
@@ -125,7 +125,6 @@ class CpuId {
 			Extended3DNow,
 			AMD3DNow
 		};
-
 		struct ProcessorInfo {
 			uint8_t Stepping;
 			uint8_t Model;
@@ -241,11 +240,11 @@ class CpuId {
 
 		CpuId();
 
-		std::string getVendorId();
-		std::string getProcessorBrandString();
-		ProcessorInfo getProcessorInfo();
-		FeatureBits getFeatureBits();
-		bool getFeatureBit(FeatureBit featureBit);
+		std::string getVendorId() const;
+		std::string getProcessorBrandString() const;
+		ProcessorInfo getProcessorInfo() const;
+		FeatureBits getFeatureBits() const;
+		bool getFeatureBit(FeatureBit featureBit) const;
 	private:
 		std::string vendorId = "";
 		std::string processorBrandString = "";
