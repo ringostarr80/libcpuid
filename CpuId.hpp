@@ -21,7 +21,7 @@ extern "C" CpuRegisters cpuid(uint32_t in);
 
 class CpuId {
 	public:
-		enum FeatureBit {
+		enum class FeatureBit {
 			// ecx Register
 			PrescottNewInstructions,
 			PCLMULQDQ,

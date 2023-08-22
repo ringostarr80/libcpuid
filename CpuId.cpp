@@ -41,23 +41,20 @@ CpuId::CpuId() {
 
 void CpuId::detectVendorId() {
 	CpuRegisters regs = cpuid(0);
-	char vendorID[13];
 
-	vendorID[0] = (regs.ebx) & 0xFF;
-	vendorID[1] = (regs.ebx >> 8) & 0xFF;
-	vendorID[2] = (regs.ebx >> 16) & 0xFF;
-	vendorID[3] = (regs.ebx >> 24);
-	vendorID[4] = (regs.edx) & 0xFF;
-	vendorID[5] = (regs.edx >> 8) & 0xFF;
-	vendorID[6] = (regs.edx >> 16) & 0xFF;
-	vendorID[7] = (regs.edx >> 24) & 0xFF;
-	vendorID[8] = (regs.ecx) & 0xFF;
-	vendorID[9] = (regs.ecx >> 8) & 0xFF;
-	vendorID[10] = (regs.ecx >> 16) & 0xFF;
-	vendorID[11] = (regs.ecx >> 24) & 0xFF;
-	vendorID[12] = '\0';
-
-	this->vendorId = vendorID;
+	this->vendorId = "";
+	this->vendorId += static_cast<char>((regs.ebx) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ebx >> 8) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ebx >> 16) & 0xFF);
+	this->vendorId += static_cast<char>(regs.ebx >> 24);
+	this->vendorId += static_cast<char>((regs.edx) & 0xFF);
+	this->vendorId += static_cast<char>((regs.edx >> 8) & 0xFF);
+	this->vendorId += static_cast<char>((regs.edx >> 16) & 0xFF);
+	this->vendorId += static_cast<char>((regs.edx >> 24) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ecx) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ecx >> 8) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ecx >> 16) & 0xFF);
+	this->vendorId += static_cast<char>((regs.ecx >> 24) & 0xFF);
 }
 
 string CpuId::getVendorId() const {
@@ -198,7 +195,7 @@ void CpuId::detectExtendedProcessorInfoAndFeatureBits() {
 }
 
 void CpuId::detectProcessorBrandString() {
-	char processorBrandString[49];
+	char processorBrandChar[49];
 	CpuRegisters regs = cpuid(0x80000000);
 
 	if (regs.eax < 0x80000004) { // feature is not supported
@@ -210,26 +207,26 @@ void CpuId::detectProcessorBrandString() {
 
 		regs = cpuid(0x80000002 + i);
 
-		processorBrandString[charIndexOffset + 0] = (regs.eax) & 0xFF;
-		processorBrandString[charIndexOffset + 1] = (regs.eax >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 2] = (regs.eax >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 3] = (regs.eax >> 24);
-		processorBrandString[charIndexOffset + 4] = (regs.ebx) & 0xFF;
-		processorBrandString[charIndexOffset + 5] = (regs.ebx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 6] = (regs.ebx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 7] = (regs.ebx >> 24);
-		processorBrandString[charIndexOffset + 8] = (regs.ecx) & 0xFF;
-		processorBrandString[charIndexOffset + 9] = (regs.ecx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 10] = (regs.ecx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 11] = (regs.ecx >> 24) & 0xFF;
-		processorBrandString[charIndexOffset + 12] = (regs.edx) & 0xFF;
-		processorBrandString[charIndexOffset + 13] = (regs.edx >> 8) & 0xFF;
-		processorBrandString[charIndexOffset + 14] = (regs.edx >> 16) & 0xFF;
-		processorBrandString[charIndexOffset + 15] = (regs.edx >> 24) & 0xFF;
+		processorBrandChar[charIndexOffset + 0] = (regs.eax) & 0xFF;
+		processorBrandChar[charIndexOffset + 1] = (regs.eax >> 8) & 0xFF;
+		processorBrandChar[charIndexOffset + 2] = (regs.eax >> 16) & 0xFF;
+		processorBrandChar[charIndexOffset + 3] = (regs.eax >> 24);
+		processorBrandChar[charIndexOffset + 4] = (regs.ebx) & 0xFF;
+		processorBrandChar[charIndexOffset + 5] = (regs.ebx >> 8) & 0xFF;
+		processorBrandChar[charIndexOffset + 6] = (regs.ebx >> 16) & 0xFF;
+		processorBrandChar[charIndexOffset + 7] = (regs.ebx >> 24);
+		processorBrandChar[charIndexOffset + 8] = (regs.ecx) & 0xFF;
+		processorBrandChar[charIndexOffset + 9] = (regs.ecx >> 8) & 0xFF;
+		processorBrandChar[charIndexOffset + 10] = (regs.ecx >> 16) & 0xFF;
+		processorBrandChar[charIndexOffset + 11] = (regs.ecx >> 24) & 0xFF;
+		processorBrandChar[charIndexOffset + 12] = (regs.edx) & 0xFF;
+		processorBrandChar[charIndexOffset + 13] = (regs.edx >> 8) & 0xFF;
+		processorBrandChar[charIndexOffset + 14] = (regs.edx >> 16) & 0xFF;
+		processorBrandChar[charIndexOffset + 15] = (regs.edx >> 24) & 0xFF;
 	}
-	processorBrandString[48] = '\0';
+	processorBrandChar[48] = '\0';
 
-	this->processorBrandString = processorBrandString;
+	this->processorBrandString = processorBrandChar;
 }
 
 string CpuId::getProcessorBrandString() const {
