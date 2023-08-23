@@ -204,8 +204,6 @@ void CpuId::detectProcessorBrandString() {
 
 	this->processorBrandString = "";
 	for(int i = 0; i < 3; i++) {
-		int charIndexOffset = i * 16;
-
 		regs = cpuid(0x80000002 + i);
 
 		this->processorBrandString += static_cast<char>((regs.eax) & 0xFF);
