@@ -195,7 +195,6 @@ void CpuId::detectExtendedProcessorInfoAndFeatureBits() {
 }
 
 void CpuId::detectProcessorBrandString() {
-	char processorBrandChar[49];
 	CpuRegisters regs = cpuid(0x80000000);
 
 	if (regs.eax < 0x80000004) { // feature is not supported
@@ -223,9 +222,6 @@ void CpuId::detectProcessorBrandString() {
 		this->processorBrandString += static_cast<char>((regs.edx >> 16) & 0xFF);
 		this->processorBrandString += static_cast<char>((regs.edx >> 24) & 0xFF);
 	}
-	processorBrandChar[48] = '\0';
-
-	this->processorBrandString = processorBrandChar;
 }
 
 string CpuId::getProcessorBrandString() const {
