@@ -202,27 +202,28 @@ void CpuId::detectProcessorBrandString() {
 		return;
 	}
 
+	this->processorBrandString = "";
 	for(int i = 0; i < 3; i++) {
 		int charIndexOffset = i * 16;
 
 		regs = cpuid(0x80000002 + i);
 
-		processorBrandChar[charIndexOffset + 0] = (regs.eax) & 0xFF;
-		processorBrandChar[charIndexOffset + 1] = (regs.eax >> 8) & 0xFF;
-		processorBrandChar[charIndexOffset + 2] = (regs.eax >> 16) & 0xFF;
-		processorBrandChar[charIndexOffset + 3] = (regs.eax >> 24);
-		processorBrandChar[charIndexOffset + 4] = (regs.ebx) & 0xFF;
-		processorBrandChar[charIndexOffset + 5] = (regs.ebx >> 8) & 0xFF;
-		processorBrandChar[charIndexOffset + 6] = (regs.ebx >> 16) & 0xFF;
-		processorBrandChar[charIndexOffset + 7] = (regs.ebx >> 24);
-		processorBrandChar[charIndexOffset + 8] = (regs.ecx) & 0xFF;
-		processorBrandChar[charIndexOffset + 9] = (regs.ecx >> 8) & 0xFF;
-		processorBrandChar[charIndexOffset + 10] = (regs.ecx >> 16) & 0xFF;
-		processorBrandChar[charIndexOffset + 11] = (regs.ecx >> 24) & 0xFF;
-		processorBrandChar[charIndexOffset + 12] = (regs.edx) & 0xFF;
-		processorBrandChar[charIndexOffset + 13] = (regs.edx >> 8) & 0xFF;
-		processorBrandChar[charIndexOffset + 14] = (regs.edx >> 16) & 0xFF;
-		processorBrandChar[charIndexOffset + 15] = (regs.edx >> 24) & 0xFF;
+		this->processorBrandString += static_cast<char>((regs.eax) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.eax >> 8) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.eax >> 16) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.eax >> 24));
+		this->processorBrandString += static_cast<char>((regs.ebx) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ebx >> 8) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ebx >> 16) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ebx >> 24));
+		this->processorBrandString += static_cast<char>((regs.ecx) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ecx >> 8) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ecx >> 16) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.ecx >> 24) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.edx) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.edx >> 8) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.edx >> 16) & 0xFF);
+		this->processorBrandString += static_cast<char>((regs.edx >> 24) & 0xFF);
 	}
 	processorBrandChar[48] = '\0';
 
